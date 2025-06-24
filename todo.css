@@ -1,0 +1,5 @@
+.todo-container{
+    /* text-align: center; */
+    display: grid;
+    grid-template-columns: 400px 350px 200px;
+}
