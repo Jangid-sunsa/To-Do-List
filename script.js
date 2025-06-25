@@ -1,37 +1,59 @@
-let todoList = [];
-displayItems();
+const addTask = document.getElementById('add-task');
+const addTaskbtn = addTask.innerText
+const enterTask = document.getElementById('enter-task');
+const recordsDisplay = document.getElementById('records');
+let taskArr = [];
+let edit_id = null;
 
-function addTodo() {
-    let inputElement = document.querySelector('#todo-input');   
-    let dateElement = document.querySelector('#todo-date');   
-    let todoItem = inputElement.value;
-    let todoDate = dateElement.value;
+let objStr = localStorage.getItem('tasks');
+if(objStr!=null){
+    taskArr = JSON.parse(objStr);
+}
+displayInfo();
 
-    if(todoItem && todoDate){
-        todoList.push({item: todoItem, dueDate: todoDate});
-        saveToLocalStorage();
-        inputElement.value = '';
-        dateElement.value = '';
-        displayItems();
+addTask.onclick=()=>{
+    const name = enterTask.value;
+    if(edit_id!=null){
+        //edit 
+        taskArr.splice(edit_id,1,{'name' : name});
+        edit_id = null;
+    }else{
+        //
+        taskArr.push({'name' : name});   
     }
+    
+    console.log(taskArr);
+    saveInfo(taskArr); 
+    enterTask.value = '';
+    addTask.innerText = addTaskbtn;
 }
 
-function displayItems() {
-    let containerElement = document.querySelector('.todo-container');
-    let newHtml = '';
-    for(let i = 0; i < todoList.length; i++){
-        let {item, dueDate} = todoList[i];
-        newHtml +=`
-        <span>${item}</span>
-        <span>${dueDate}</span>
-        <button onclick="todoList.splice(${i}, 1);
-        displayItems();">Delete</button>`;
-    } containerElement.innerHTML = newHtml;
+function saveInfo(taskArr){
+    let str = JSON.stringify(taskArr);
+    localStorage.setItem('tasks', str);
+    displayInfo();
 }
 
-function saveToLocalStorage(){
-    localStorage.setItem('todoList', JSON.stringify(todoList));
+function displayInfo(){
+    let statement = '';
+    taskArr.forEach((task,i) =>{
+        statement += `<tr>
+        <th scope="row">${i+1}</th>
+        <td>${task.name}</td>
+        <td><i class="btn btn-info text-white fa fa-edit mx-3" onclick='editInfo(${i})'></i><i class="btn btn-danger text-white fa fa-trash-o" onclick='deleteInfo(${i})'></i> </td>
+      </tr>`
+    });
+    recordsDisplay.innerHTML = statement;
 }
 
+function editInfo(id){
+    edit_id = id;
+    enterTask.value = taskArr[id].name;
+    addTask.innerText = 'Save Changes';
+}
 
-
+function deleteInfo(id){
+    taskArr.splice(id,1);
+    saveInfo(taskArr);
+    displayInfo();
+}
